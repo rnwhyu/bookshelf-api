@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 const { nanoid } = require('nanoid');
 const books = require('./books');
 
@@ -21,7 +20,7 @@ const addBookHandler = (request, h) => {
     pageCount: Number(pageCount),
     readPage: Number(readPage),
     finished: readPage === pageCount,
-    reading: reading === 'true',
+    reading,
     insertedAt,
     updatedAt,
   };
@@ -65,27 +64,13 @@ const getAllBooksHandler = (request, h) => {
   const { name, reading, finished } = request.query;
   const filteredBooks = books.filter(
     (book) => (typeof name !== 'undefined' ? book.name.toLowerCase().includes(name.toLowerCase()) : true)
-    && (typeof reading !== 'undefined' ? book.reading === (reading === 1) : true)
-    && (typeof finished !== 'undefined' ? book.finished === (finished === 1) : true),
+    && (typeof reading !== 'undefined' ? book.reading === (reading === '1') : true)
+    && (typeof finished !== 'undefined' ? book.finished === (finished === '1') : true),
   );
-  if (filteredBooks) {
-    const response = h.response({
-      status: 'success',
-      data: {
-        books: filteredBooks.map((book) => ({
-          id: book.id,
-          name: book.name,
-          publisher: book.publisher,
-        })),
-      },
-    });
-    response.code(201);
-    return response;
-  }
   const response = h.response({
     status: 'success',
     data: {
-      books: books.map((book) => ({
+      books: filteredBooks.map((book) => ({
         id: book.id,
         name: book.name,
         publisher: book.publisher,
@@ -100,7 +85,7 @@ const getBookByIdHandler = (request, h) => {
   const book = books.filter((b) => b.id === id)[0];
   if (book !== undefined) {
     return {
-      status: 'Success',
+      status: 'success',
       data: {
         book,
       },
@@ -124,7 +109,7 @@ const editNoteByIdHandler = (request, h) => {
   if (!name || !name.length) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal menambahkan buku. Mohon isi nama buku',
+      message: 'Gagal memperbarui buku. Mohon isi nama buku',
     });
     response.code(400);
     return response;
@@ -132,7 +117,7 @@ const editNoteByIdHandler = (request, h) => {
   if (Number(readPage) > Number(pageCount)) {
     const response = h.response({
       status: 'fail',
-      message: 'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount',
+      message: 'Gagal memperbarui buku. readPage tidak boleh lebih besar dari pageCount',
     });
     response.code(400);
     return response;
@@ -148,7 +133,7 @@ const editNoteByIdHandler = (request, h) => {
       pageCount: Number(pageCount),
       readPage: Number(readPage),
       finished: readPage === pageCount,
-      reading: reading === 'true',
+      reading,
       updatedAt,
     };
     const response = h.response({
@@ -160,7 +145,7 @@ const editNoteByIdHandler = (request, h) => {
   }
   const response = h.response({
     status: 'fail',
-    message: 'Gagal memperbarui buku, Id tidak ditemukan',
+    message: 'Gagal memperbarui buku. Id tidak ditemukan',
   });
   response.code(404);
   return response;
